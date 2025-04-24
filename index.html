@@ -144,7 +144,7 @@
         }
 
         .final-result {
-            font-size: 1.5rem;
+            font-size: 1.1rem;
             font-weight: bold;
             color: var(--secondary-color);
             margin-top: 20px;
@@ -354,7 +354,11 @@
                 stepsContainer.appendChild(stepElement);
             });
             
-            document.getElementById('finalResult').textContent = `Total Final - ${quantidade} peça(s): R$ ${total.toFixed(2)}`;
+            // Exibir valor por unidade e total
+            document.getElementById('finalResult').innerHTML = `
+                <p><strong>Valor por unidade:</strong> R$ ${(total / quantidade).toFixed(2)}</p>
+                <p><strong>Total (${quantidade} peça(s)):</strong> R$ ${total.toFixed(2)}</p>
+            `;
             document.getElementById('results').style.display = 'block';
         });
 

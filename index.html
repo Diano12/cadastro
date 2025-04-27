@@ -93,11 +93,12 @@
 
         input[type="number"] {
             width: 100%;
-            padding: 5px;
+            padding: 12px 15px;
             border: 1px solid #d3b3b3;
             border-radius: 5px;
             font-size: 16px;
             transition: border 0.3s;
+            text-align: center;
         }
 
         input[type="number"]:focus {
@@ -153,6 +154,7 @@
             background-color: #e3f2fd;
             border-radius: 5px;
         }
+        
         label {
             text-align: center;
             display: block;
@@ -161,13 +163,16 @@
             color: var(--secondary-color);
         }
 
-        input 
-        {
+        #quantidade, #valorbruto, #Tarracha, #Peso, #Camada, #Margem {
             text-align: center;
             display: block;
             margin-bottom: 8px;
             font-weight: 600;
-            color: var(--secondary-color);
+            color: rgb(17, 0, 255)
+        }
+
+        #Margemperdas, #Etiquetas, #Ouro, #Margem {
+            color: red
         }
 
         @media (max-width: 600px) {
@@ -198,20 +203,6 @@
                 padding: 20px;
             }
         }
-
-        #quantidade, #valorbruto, #Tarracha, #Peso, #Camada, #Margem {
-            text-align: center;
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 600;
-            color: rgb(17, 0, 255)
-        }
-
-        #Margemperdas, #Etiquetas, #Ouro, #Margem {
-            color: red
-        }
-        
-        
     </style>
 </head>
 <body>
@@ -225,51 +216,51 @@
     <main>
         <div class="container">
             <div class="form-group">
-                <label for="quantidade">QUANTIDADE </label>
-                <input type="number" id="quantidade" value="" step="1" min="1">
+                <label for="quantidade">QUANTIDADE</label>
+                <input type="number" id="quantidade" value="" step="1" min="1" class="campo-form" tabindex="1">
             </div>
             
             <div class="form-group">
                 <label for="valorBase">Valor Bruto (R$)</label>
-                <input type="number" id="valorbruto" value="" step="0.01" min="0">
+                <input type="number" id="valorbruto" value="" step="0.01" min="0" class="campo-form" tabindex="2">
             </div>
             
             <div class="form-group">
                 <label for="percentual1">Margem (Perdas Bruto) (%)</label>
-                <input type="number" id="Margemperdas" value="6" step="0.01" min="0">
+                <input type="number" id="Margemperdas" value="6" step="0.01" min="0" class="campo-form" tabindex="3">
             </div>
             
             <div class="form-group">
                 <label for="valorAdicional1">Etiquetas (R$)</label>
-                <input type="number" id="Etiquetas" value="0.12" step="0.01" min="0">
+                <input type="number" id="Etiquetas" value="0.12" step="0.01" min="0" class="campo-form" tabindex="4">
             </div>
             
             <div class="form-group">
                 <label for="valorAdicional2">Tarracha (R$)</label>
-                <input type="number" id="Tarracha" value="" step="0.01" min="0">
+                <input type="number" id="Tarracha" value="" step="0.01" min="0" class="campo-form" tabindex="5">
             </div>
             
             <div class="form-group">
                 <label for="gramas">Peso (g)</label>
-                <input type="number" id="Peso" value="" step="0.01" min="0">
+                <input type="number" id="Peso" value="" step="0.01" min="0" class="campo-form" tabindex="6">
             </div>
             
             <div class="form-group">
                 <label for="valorPorGrama">Milésimo de Ouro (R$/g)</label>
-                <input type="number" id="Ouro" value="0.58" step="0.01" min="0">
+                <input type="number" id="Ouro" value="0.58" step="0.01" min="0" class="campo-form" tabindex="7">
             </div>
             
             <div class="form-group">
                 <label for="multiplicador">Camada</label>
-                <input type="number" id="Camada" value="" step="1" min="0">
+                <input type="number" id="Camada" value="" step="1" min="0" class="campo-form" tabindex="8">
             </div>
             
             <div class="form-group">
                 <label for="percentualFinal">Margem Final (%)</label>
-                <input type="number" id="Margem" value="120" step="0.01" min="0">
+                <input type="number" id="Margem" value="120" step="0.01" min="0" class="campo-form" tabindex="9">
             </div>
             
-            <button id="calcular">Calcular</button>
+            <button id="calcular" tabindex="10">Calcular</button>
             
             <div class="results" id="results" style="display: none;">
                 <h2>Detalhes do Cálculo</h2>
@@ -280,6 +271,405 @@
     </main>
 
     <script>
+        // Navegação entre campos com Enter
+        document.querySelectorAll('.campo-form').forEach((campo, index, campos) => {
+            campo.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    if (index < campos.length - 1) {
+                        campos[index + 1].focus();
+                    } else {
+                        document.getElementById('calcular').focus();
+                    }
+                }
+            });
+        });
+
+        // Focar no primeiro campo ao carregar
+        window.addEventListener('load', function() {
+            document.getElementById('quantidade').focus();
+        });
+
+        document.getElementById('calcular').addEventListener('click', function() {
+            // Obter valores dos inputs
+            const quantidade = parseInt(document.getElementById('quantidade').value) || 1;
+            const valorBase = parseFloat(document.getElementById('valorbruto').value) || 0;
+            const percentual1 = parseFloat(document.getElementById('Margemperdas').value) || 0;
+            const valorAdicional1 = parseFloat(document.getElementById('Etiquetas').value) || 0;
+            const valorAdicional2 = parseFloat(document.getElementById('Tarracha').value) || 0;
+            const gramas = parseFloat(document.getElementById('Peso').value) || 0;
+            const valorPorGrama = parseFloat(document.getElementById('Ouro').value) || 0;
+            const multiplicador = parseFloat(document.getElementById('Camada').value) || 0;
+            const percentualFinal = parseFloat(document.getElementById('Margem').value) || 0;
+            
+            // Calcular valores totais considerando a quantidade
+            const valorBaseTotal = valorBase * quantidade;
+            const valorAdicional1Total = valorAdicional1 * quantidade;
+            const valorAdicional2Total = valorAdicional2 * quantidade;
+            const gramasTotal = gramas * quantidade;
+            
+            // Realizar cálculos passo a passo
+            let steps = [];
+            let total = valorBaseTotal;
+            
+            // Passo 1: Valor base + primeiro percentual
+            const valorPercentual1 = total * (percentual1 / 100);
+            total += valorPercentual1;
+            steps.push({
+                description: `Valor Bruto (${quantidade} peças × R$ ${valorBase.toFixed(2)} = R$ ${valorBaseTotal.toFixed(2)}) + ${percentual1}% (R$ ${valorPercentual1.toFixed(2)})`,
+                value: total.toFixed(2)
+            });
+            
+            // Passo 2: Adicionar valor adicional 1
+            total += valorAdicional1Total;
+            steps.push({
+                description: `Etiquetas (${quantidade} peças × R$ ${valorAdicional1.toFixed(2)} = R$ ${valorAdicional1Total.toFixed(2)})`,
+                value: total.toFixed(2)
+            });
+            
+            // Passo 3: Adicionar valor adicional 2
+            total += valorAdicional2Total;
+            steps.push({
+                description: `Tarrachas (${quantidade} peças × R$ ${valorAdicional2.toFixed(2)} = R$ ${valorAdicional2Total.toFixed(2)})`,
+                value: total.toFixed(2)
+            });
+            
+            // Passo 4: Cálculo das gramas
+            const valorGramas = gramasTotal * valorPorGrama * multiplicador;
+            total += valorGramas;
+            steps.push({
+                description: `Cálculo do ouro - ${gramasTotal}g (${quantidade} × ${gramas}g) × R$ ${valorPorGrama.toFixed(2)} × ${multiplicador} = R$ ${valorGramas.toFixed(2)}`,
+                value: total.toFixed(2)
+            });
+            
+            // Passo 5: Aplicar percentual final
+            const valorPercentualFinal = total * (percentualFinal / 100);
+            total += valorPercentualFinal;
+            steps.push({
+                description: `+ ${percentualFinal}% sobre o total (R$ ${valorPercentualFinal.toFixed(2)})`,
+                value: total.toFixed(2)
+            });
+            
+            // Exibir resultados
+            const stepsContainer = document.getElementById('steps');
+            stepsContainer.innerHTML = '';
+            
+            steps.forEach((step, index) => {
+                const stepElement = document.createElement('div');
+                stepElement.className = 'step';
+                stepElement.innerHTML = `
+                    <p><strong>Passo ${index + 1}:</strong> ${step.description}</p>
+                    <p><strong>Subtotal:</strong> R$ ${step.value}</p>
+                `;
+                stepsContainer.appendChild(stepElement);
+            });
+            
+            // Exibir valor por unidade e total
+            document.getElementById('finalResult').innerHTML = `
+                <p><strong>Valor por unidade:</strong> R$ ${(total / quantidade).toFixed(2)}</p>
+                <p><strong>Total (${quantidade} peça(s)):</strong> R$ ${total.toFixed(2)}</p>
+            `;
+            document.getElementById('results').style.display = 'block';
+        });
+
+        // Calcular automaticamente ao carregar a página
+        window.addEventListener('load', function() {
+            document.getElementById('calcular').click();
+        });
+    </script>
+</body>
+</html><!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Calculadora Cadastro</title>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#166088">
+    <style>
+        :root {
+            --primary-color: #4a6fa5;
+            --secondary-color: #271c1c;
+            --accent-color: #0899dd;
+            --text-color: #333;
+            --light-bg: #9b9fac;
+            --white: #ffffff;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --white2: #f00b0b;
+        }
+
+        * {
+            -webkit-tap-highlight-color: transparent;
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--light-bg);
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+
+        header {
+            width: 100%;
+            background-color: var(--secondary-color);
+            margin-bottom: 30px;
+            color: white;
+            padding: 20px 0;
+            text-align: center;
+            box-shadow: var(--shadow);
+        }
+
+        .header-container {
+            width: 100%;
+            padding: 0 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .logo {
+            height: 100px;
+            width: auto;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 30px auto;
+            background-color: var(--white);
+            border-radius: 10px;
+            box-shadow: var(--shadow);
+            padding: 30px;
+        }
+
+        h1 {
+            color: white;
+            margin-bottom: 0;
+            font-size: 2rem;
+        }
+
+        h2 {
+            color: var(--secondary-color);
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--secondary-color);
+        }
+
+        input[type="number"] {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #d3b3b3;
+            border-radius: 5px;
+            font-size: 16px;
+            transition: border 0.3s;
+            text-align: center;
+        }
+
+        input[type="number"]:focus {
+            border-color: var(--white2);
+            outline: none;
+        }
+
+        button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            width: 100%;
+            transition: background-color 0.3s;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            background-color: var(--secondary-color);
+        }
+
+        .results {
+            margin-top: 30px;
+            background-color: #f8f9fa;
+            padding: 10px;
+            border-radius: 5px;
+            border-left: 4px solid var(--accent-color);
+        }
+
+        .step {
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px dashed #ddd;
+        }
+
+        .step:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .final-result {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: var(--secondary-color);
+            margin-top: 20px;
+            text-align: center;
+            padding: 15px;
+            background-color: #e3f2fd;
+            border-radius: 5px;
+        }
+        
+        label {
+            text-align: center;
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--secondary-color);
+        }
+
+        #quantidade, #valorbruto, #Tarracha, #Peso, #Camada, #Margem {
+            text-align: center;
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: rgb(17, 0, 255)
+        }
+
+        #Margemperdas, #Etiquetas, #Ouro, #Margem {
+            color: red
+        }
+
+        @media (max-width: 600px) {
+            .header-container {
+                flex-direction: column;
+                gap: 10px;
+                padding: 10px;
+            }
+            
+            .logo {
+                height: 100px;
+                width: auto;
+            }
+            
+            header {
+                padding: 10px 0;
+            }
+            
+            .container {
+                padding: 10px;
+            }
+            
+            h1 {
+                font-size: 1.5rem;
+            }
+            
+            input[type="number"], button {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-container">
+            <img src="https://jrjoiasfolheadas.com.br/wp-content/uploads/2024/07/marca-jr-joias-1024x472.png" alt="Logo da Empresa" class="logo">
+            <h1>Calculadora Cadastro</h1>
+        </div>
+    </header>
+    
+    <main>
+        <div class="container">
+            <div class="form-group">
+                <label for="quantidade">QUANTIDADE</label>
+                <input type="number" id="quantidade" value="" step="1" min="1" class="campo-form" tabindex="1">
+            </div>
+            
+            <div class="form-group">
+                <label for="valorBase">Valor Bruto (R$)</label>
+                <input type="number" id="valorbruto" value="" step="0.01" min="0" class="campo-form" tabindex="2">
+            </div>
+            
+            <div class="form-group">
+                <label for="percentual1">Margem (Perdas Bruto) (%)</label>
+                <input type="number" id="Margemperdas" value="6" step="0.01" min="0" class="campo-form" tabindex="3">
+            </div>
+            
+            <div class="form-group">
+                <label for="valorAdicional1">Etiquetas (R$)</label>
+                <input type="number" id="Etiquetas" value="0.12" step="0.01" min="0" class="campo-form" tabindex="4">
+            </div>
+            
+            <div class="form-group">
+                <label for="valorAdicional2">Tarracha (R$)</label>
+                <input type="number" id="Tarracha" value="" step="0.01" min="0" class="campo-form" tabindex="5">
+            </div>
+            
+            <div class="form-group">
+                <label for="gramas">Peso (g)</label>
+                <input type="number" id="Peso" value="" step="0.01" min="0" class="campo-form" tabindex="6">
+            </div>
+            
+            <div class="form-group">
+                <label for="valorPorGrama">Milésimo de Ouro (R$/g)</label>
+                <input type="number" id="Ouro" value="0.58" step="0.01" min="0" class="campo-form" tabindex="7">
+            </div>
+            
+            <div class="form-group">
+                <label for="multiplicador">Camada</label>
+                <input type="number" id="Camada" value="" step="1" min="0" class="campo-form" tabindex="8">
+            </div>
+            
+            <div class="form-group">
+                <label for="percentualFinal">Margem Final (%)</label>
+                <input type="number" id="Margem" value="120" step="0.01" min="0" class="campo-form" tabindex="9">
+            </div>
+            
+            <button id="calcular" tabindex="10">Calcular</button>
+            
+            <div class="results" id="results" style="display: none;">
+                <h2>Detalhes do Cálculo</h2>
+                <div id="steps"></div>
+                <div class="final-result" id="finalResult"></div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Navegação entre campos com Enter
+        document.querySelectorAll('.campo-form').forEach((campo, index, campos) => {
+            campo.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    if (index < campos.length - 1) {
+                        campos[index + 1].focus();
+                    } else {
+                        document.getElementById('calcular').focus();
+                    }
+                }
+            });
+        });
+
+        // Focar no primeiro campo ao carregar
+        window.addEventListener('load', function() {
+            document.getElementById('quantidade').focus();
+        });
+
         document.getElementById('calcular').addEventListener('click', function() {
             // Obter valores dos inputs
             const quantidade = parseInt(document.getElementById('quantidade').value) || 1;

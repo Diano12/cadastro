@@ -6,7 +6,7 @@
     <title>Calculadora Cadastro</title>
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="theme-color" content="#166088">
+    <meta name="theme-color" content="#0a0a0a">
     <style>
         :root {
             --primary-color: #4a6fa5;
@@ -17,7 +17,8 @@
             --white: #ffffff;
             --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             --white2: #f00b0b;
-            --yellow: #ecec53
+            --yellow: #ecec53;
+            --header-bg: #0a0a0a; /* Tom de preto mais escuro como da imagem */
         }
 
         * {
@@ -36,36 +37,64 @@
 
         header {
             width: 100%;
+            text-align: center;
+            color: var(--white);
+            font-size: 1.2rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            box-shadow: var(--shadow);
+            background-color: var(--header-bg);
+            padding: 20px 0;
             position: relative;
-            overflow: hidden;
-            min-height: 140px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .header-bg {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            z-index: 1;
-            opacity: 1; /* opacidade total para a logo ser destaque e única */
+            z-index: 10;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.1);
         }
 
         .header-container {
-            width: 100%;
-            height: 100%;
-            position: relative;
-            z-index: 2;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
             display: flex;
             align-items: center;
             justify-content: center;
         }
 
-        /* Removido h1, pois não há mais texto */
+        .logo-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            position: relative;
+        }
+
+        /* Gradiente para suavizar a transição da logo para o fundo */
+        .logo-wrapper::before {
+            content: '';
+            position: absolute;
+            top: -20px;
+            left: 0;
+            right: 0;
+            height: 80px;
+            background: linear-gradient(to bottom, 
+                rgba(10, 10, 10, 0) 0%, 
+                rgba(10, 10, 10, 1) 100%);
+            pointer-events: none;
+        }
+
+        .logo {
+            height: 200px;
+            width: auto;
+            object-fit: contain;
+            display: block;
+            filter: brightness(1.05) contrast(1.1);
+            transition: transform 0.3s ease;
+        }
+
+        /* Efeito hover sutil na logo */
+        .logo:hover {
+            transform: scale(1.02);
+        }
 
         .container {
             max-width: 800px;
@@ -177,36 +206,63 @@
             color: red
         }
 
-        @media (max-width: 600px) {
-            .header-container {
-                flex-direction: column;
-                gap: 10px;
-                padding: 10px;
-            }
-
+        @media (max-width: 768px) {
             header {
-                padding: 10px 0;
-                min-height: 90px;
+                padding: 15px 0;
             }
+            
+            .header-container {
+                padding: 0 15px;
+            }
+            
+            .logo {
+                height: 70px;
+            }
+            
             .container {
-                padding: 10px;
+                margin: 20px 15px;
+                padding: 20px 15px;
             }
-            h1 {
-                font-size: 1.5rem;
+        }
+
+        @media (max-width: 480px) {
+            header {
+                padding: 12px 0;
             }
+            
+            .header-container {
+                padding: 0 10px;
+            }
+            
+            .logo {
+                height: 60px;
+            }
+            
+            .container {
+                padding: 15px 10px;
+                margin: 15px 10px;
+            }
+            
             input[type="number"], button {
-                padding: 20px;
+                padding: 15px;
+                font-size: 14px;
+            }
+            
+            label {
+                font-size: 14px;
             }
         }
     </style>
 </head>
 <body>
     <header>
-        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSLN4c2nx5V9lZ9gb3AUAQkw8Hp7JlqTlAj9Q&s"
-             alt="Logo da Empresa"
-             class="header-bg" />
-        <!-- header-container vazio, se quiser remover pode tirar também -->
-        <div class="header-container"></div>
+        <div class="header-container">
+            <div class="logo-wrapper">
+                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSLN4c2nx5V9lZ9gb3AUAQkw8Hp7JlqTlAj9Q&s"
+                     alt="Logo da Empresa"
+                     class="logo" />
+            </div>
+        </div>
     </header>
     
     <main>
@@ -242,8 +298,9 @@
             </div>
             
             <div class="form-group">
-                <label for="valorPorGrama">Ouro (R$580,00/g)</label>
-                <input type="number" id="Ouro" value="0.58" step="0.01" min="0" class="campo-form" tabindex="7">
+                <label for="valorPorGrama">Ouro (R$/g)</label>
+                <input type="number" id="Ouro" value="" step="0.01" min="0" class="campo-form" tabindex="7">
+                 <div class="input-info">Digite o valor em milésimo (ex: 0,7 para R$ 700,00/g)</div>
             </div>
             
             <div class="form-group">
@@ -252,8 +309,8 @@
             </div>
             
             <div class="form-group">
-                <label for="percentualFinal">Margem Final (%)</label>
-                <input type="number" id="Margem" value="120" step="0.01" min="0" class="campo-form" tabindex="9">
+                <label for="percentualFinal">Margem de Lucro (%)</label>
+                <input type="number" id="Margem" value="100" step="0.01" min="0" class="campo-form" tabindex="9">
             </div>
             
             <button id="calcular" tabindex="10">Calcular</button>
